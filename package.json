@@ -1,0 +1,49 @@
+{
+	"id": "gitInfo",
+	"name": "gitInfo",
+	"description": "查看当前行的最后一次git提交信息",
+	"displayName": "git info",
+	"version": "0.0.1",
+	"publisher": "leftstyle",
+	"author": {
+	  "name": "leftstyle",
+	  "email": "jkh5@foxmail.com",
+	  "url": "http://www.leftstyle.cn"
+	},
+	"homepage": "https://github.com/a/b#readme",
+	"repository": {
+	  "type": "git",
+	  "url": "https://github.com/leftstyle/git-info"
+	},
+	"engines": {
+		"HBuilderX": "^2.7.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"main": "./extension.js",
+	"activationEvents": [
+		"onCommand:extension.gitInfo"
+	],
+	"contributes": {
+		"commands": [{
+			"command": "extension.gitInfo",
+			"title": "Show Git Info"
+		}],
+		"menus": {
+			"editor/context": [{
+					"command": "extension.gitInfo",
+					"group": "z_commands",
+					"when": "editorTextFocus"
+				},
+				{
+					"group": "z_commands"
+				}
+			]
+		}
+	},
+	"extensionDependencies": [
+		"plugin-manager"
+	],
+	"dependencies": {}
+}
