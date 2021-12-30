@@ -1,3 +1,12 @@
+/**
+ * Name: gitInfo
+ * Desc: An Hbuilder-X plug-in that can display Git information.
+ * Author: leftstyle
+ * Email:  jkh5#foxmail.com
+ * Publish Date: 2021-12-30
+ *
+ */
+
 var hx = require("hbuilderx");
 
 function activate(context) {
@@ -26,18 +35,19 @@ function activate(context) {
 				console.log(stdout);
 				let str = stdout.match(
 					/^\^(\w+)\s+\((.+?)\s+(\d+[\d\s\-\:\+]+)\s+(\d{1,})\)\s*(.*)/i)
-				let maps = ['Msg','Commit', 'Author', 'Date', 'Line number', 'Content']
+				let maps = ['Msg', 'Commit', 'Author', 'Date', 'Line number', 'Content']
 
-				let strLenLimit = 30;
+				let strLenLimit = 20;
 				for (let i = 1; i < 6; i++) {
-					let val = str[i].length > strLenLimit ? str[i].substr(0, strLenLimit) + '...' : str[i];
+					let val = str[i].length > strLenLimit ? str[i].substr(0, strLenLimit) + '...' :
+						str[i];
 					html += `<div>
 								<span style="display: inline-block;width: 100px;color: #999;">[${maps[i]}]:</span>
-								<span>${val}</span>
+								<span>${html2entities(val)}</span>
 							</div>`
 				}
 			} else {
-				html+=` <h5>出错啦</h5>
+				html += ` <h5>出错啦</h5>
 						<p>${stderr}</p>
 						<p style="color: #999;">如果您判断为插件的问题，请反馈给插件开发者。</p>
 						<p style="color: #bbb;">本信息来自HBuilder X插件[git-info]</p>`
@@ -54,10 +64,20 @@ function activate(context) {
 //该方法将在插件禁用的时候调用（目前是在插件卸载的时候触发）
 function deactivate() {
 	console.log('git show in line plugin deactivate.');
-
 }
 
 module.exports = {
 	activate,
 	deactivate
+}
+
+function html2entities(str) {
+	const chartMap = {
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#39;'
+	};
+	
+	return str.replace(/(<|>|"|')/ig,val=>chartMap[val])
 }
