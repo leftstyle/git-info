@@ -3,7 +3,7 @@
 	"name": "gitInfo",
 	"description": "查看当前行的最后一次git提交信息",
 	"displayName": "git info",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"publisher": "leftstyle",
 	"author": {
 	  "name": "leftstyle",
