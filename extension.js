@@ -27,32 +27,57 @@ function activate(context) {
 		console.log(fileName);
 
 		const exec = require('child_process').exec;
-		exec(`git blame -L ${lineNumber},${lineNumber} -- ./${fileName}`, {
+		exec(`git blame -p -L ${lineNumber},+1 -- ./${fileName}`, {
 			cwd: fileDir
 		}, (err, stdout, stderr) => {
 			let html = '';
 			if (!err) {
 				console.log(stdout);
-				let str = stdout.match(
-					/^[\^\s]?(\w+)\s+\((.+?)\s+(\d+[\d\s\-\:\+]+)\s+(\d{1,})\)\s*(.*)/i)
-				let maps = ['Msg', 'Commit', 'Author', 'Date', 'Line number', 'Content'];
+				let strArray = stdout.split('\n');
+				let htmlMap = new Map();
+				strArray = strArray.filter(i => !!i).map(i => i.split(' '));
 
-				let strLenLimit = 20;
-				for (let i = 1; i < 6; i++) {
-					let val;
-
-					if (maps[i] === 'Date') {
-						let tmp = new Date(str[i]);
-						val =`${tmp.toLocaleDateString()} ${tmp.toLocaleTimeString()}`;
-					}else {
-						val = str[i].length > strLenLimit ? str[i].substr(0, strLenLimit) + '...' :str[i];
+				console.log(strArray);
+				let strLenLimit = 30;
+				for (let i = 0, len = strArray.length; i < len; i++) {
+					let str;
+					if (i === 0) {
+						htmlMap.set('Commit', `${strArray[i][0].substr(0, 8)} (line: ${strArray[i][2]})`);
+					} else if (i === len - 1) {
+						str = strArray[i].join(' ').trim();
+						htmlMap.set('Content', html2entities(str.length > strLenLimit ? str.substr(0,
+							strLenLimit) + '...' : str))
+					} else {
+						switch (strArray[i][0]) {
+							case 'author':
+								htmlMap.set('Author', strArray[i][1])
+								break;
+							case 'committer':
+								if(strArray[i][1] === htmlMap.get('Author')) break;
+								htmlMap.set('Committer', strArray[i][1])
+								break;
+							case 'committer-time':
+								let tmp = new Date(strArray[i][1]*1000);
+								htmlMap.set('Date',
+									`${tmp.toLocaleDateString()} ${tmp.toLocaleTimeString('chinese', { hour12: false})}`
+									)
+								break;
+							case 'summary':
+								str = strArray[i].slice(1).join(' ');
+								htmlMap.set('Summary', str);
+								break;
+							default:
+								break;
+						}
 					}
-					
-					html += `<div>
-								<span style="display: inline-block;width: 100px;color: #999;">[${maps[i]}]:</span>
-								<span>${html2entities(val)}</span>
-							</div>`
 				}
+				
+				htmlMap.forEach((v,k)=>{
+					html += `<div>
+								<span style="display: inline-block;width: 100px;color: #999;">[${k}]:</span>
+								<span title="${v}">${v}</span>
+							</div>`
+				})
 			} else {
 				html += ` <h5>出错啦</h5>
 						<p>${stderr}</p>
@@ -61,6 +86,7 @@ function activate(context) {
 				console.log(err);
 				console.log(stderr);
 			}
+			
 			hx.window.showInformationMessage(html);
 		})
 
