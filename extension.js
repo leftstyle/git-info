@@ -34,13 +34,20 @@ function activate(context) {
 			if (!err) {
 				console.log(stdout);
 				let str = stdout.match(
-					/^\^(\w+)\s+\((.+?)\s+(\d+[\d\s\-\:\+]+)\s+(\d{1,})\)\s*(.*)/i)
-				let maps = ['Msg', 'Commit', 'Author', 'Date', 'Line number', 'Content']
+					/^[\^\s]?(\w+)\s+\((.+?)\s+(\d+[\d\s\-\:\+]+)\s+(\d{1,})\)\s*(.*)/i)
+				let maps = ['Msg', 'Commit', 'Author', 'Date', 'Line number', 'Content'];
 
 				let strLenLimit = 20;
 				for (let i = 1; i < 6; i++) {
-					let val = str[i].length > strLenLimit ? str[i].substr(0, strLenLimit) + '...' :
-						str[i];
+					let val;
+
+					if (maps[i] === 'Date') {
+						let tmp = new Date(str[i]);
+						val =`${tmp.toLocaleDateString()} ${tmp.toLocaleTimeString()}`;
+					}else {
+						val = str[i].length > strLenLimit ? str[i].substr(0, strLenLimit) + '...' :str[i];
+					}
+					
 					html += `<div>
 								<span style="display: inline-block;width: 100px;color: #999;">[${maps[i]}]:</span>
 								<span>${html2entities(val)}</span>
@@ -49,7 +56,7 @@ function activate(context) {
 			} else {
 				html += ` <h5>出错啦</h5>
 						<p>${stderr}</p>
-						<p style="color: #999;">如果您判断为插件的问题，请反馈给插件开发者。</p>
+						<p style="color: #999;">如果您判断为插件的问题，请反馈给插件开发者，谢谢。</p>
 						<p style="color: #bbb;">本信息来自HBuilder X插件[git-info]</p>`
 				console.log(err);
 				console.log(stderr);
@@ -78,6 +85,6 @@ function html2entities(str) {
 		'"': '&quot;',
 		"'": '&#39;'
 	};
-	
-	return str.replace(/(<|>|"|')/ig,val=>chartMap[val])
+
+	return str.replace(/(<|>|"|')/ig, val => chartMap[val])
 }
